@@ -134,9 +134,9 @@ export const DockedAiCoPilot: React.FC<DockedAiCoPilotProps> = ({ isOpen, onClos
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-16 right-0 w-full sm:w-96 md:w-[420px] bg-white border-l border-slate-200/90 shadow-2xl z-40 flex flex-col animate-slide-left font-sans">
+    <div className="fixed top-16 bottom-0 right-0 w-full sm:w-96 md:w-[420px] copilot-panel border-l shadow-2xl z-40 flex flex-col animate-slide-left font-sans">
       {/* Co-Pilot Header */}
-      <div className="px-4 py-3.5 border-b border-slate-200/90 bg-white flex items-center justify-between shadow-xs">
+      <div className="px-3 sm:px-4 py-3.5 border-b copilot-header flex items-center justify-between shadow-xs">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-sm shadow-purple-500/20">
             <Bot className="w-4 h-4" />
@@ -175,7 +175,7 @@ export const DockedAiCoPilot: React.FC<DockedAiCoPilotProps> = ({ isOpen, onClos
       </div>
 
       {/* Messages Scroll Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 text-xs bg-slate-50/40">
+      <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-4 text-xs copilot-messages">
         {messages.map((msg) => {
           const isUser = msg.sender === 'user';
           return (
@@ -224,7 +224,7 @@ export const DockedAiCoPilot: React.FC<DockedAiCoPilotProps> = ({ isOpen, onClos
       </div>
 
       {/* Suggested Quick Coach Prompts */}
-      <div className="px-3 py-2 bg-white border-t border-slate-200/80 flex items-center gap-1.5 overflow-x-auto text-[11px]">
+      <div className="px-3 py-2 copilot-composer border-t flex items-center gap-1.5 overflow-x-auto text-[11px]">
         {[
           '📊 Analyze my gaps',
           '⚡ 3-min interview drill',
@@ -243,7 +243,7 @@ export const DockedAiCoPilot: React.FC<DockedAiCoPilotProps> = ({ isOpen, onClos
       </div>
 
       {/* Input Field */}
-      <div className="p-3 bg-white border-t border-slate-200">
+      <div className="p-3 copilot-composer border-t">
         <form
           onSubmit={(e) => {
             e.preventDefault();
