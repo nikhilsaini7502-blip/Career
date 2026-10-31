@@ -31,7 +31,7 @@ async function startServer() {
     console.log('[PROOFPATH] Vite middlewares mounted in development mode');
   } else {
     // Production mode: Serve built static files
-    const distPath = path.resolve(__dirname, 'dist');
+    const distPath = path.resolve(__dirname, '../dist');
     app.use(express.static(distPath));
     app.get('*', (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
