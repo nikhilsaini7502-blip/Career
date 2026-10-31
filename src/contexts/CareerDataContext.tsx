@@ -337,7 +337,7 @@ export const CareerDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     if (artifactTitle) {
       const newEv: SkillEvidenceRecord = {
         id: `ev-${Date.now()}`,
-        userId: user?.uid || profile.uid,
+        userId: user?.id || profile.uid,
         skillName,
         evidenceType: newState === 'APPLIED' ? 'PROJECT' : 'ASSESSMENT',
         referenceTitle: artifactTitle,
@@ -382,7 +382,7 @@ export const CareerDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const newApp: JobApplication = {
       ...app,
       id: `app-${Date.now()}`,
-      userId: user?.uid || profile.uid
+      userId: user?.id || profile.uid
     };
     setApplications(prev => [newApp, ...prev]);
   };
