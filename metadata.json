@@ -1,0 +1,6 @@
+{
+  "name": "PROOFPATH — Multi-Agent AI Career OS",
+  "description": "Intelligent multi-agent career operating system for skill gap analysis, evidence-based readiness tracking, personalized learning roadmaps, and interview preparation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

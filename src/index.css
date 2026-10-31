@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #F8FAFC;
+    color: #0F172A;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Custom subtle light scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Modern 3D & Elevation Utilities */
+.card-3d {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: perspective(1000px) translateZ(0);
+}
+
+.card-3d:hover {
+  transform: perspective(1000px) translateY(-3px) translateZ(8px);
+  box-shadow: 0 14px 28px -8px rgba(124, 58, 237, 0.14), 0 4px 10px -2px rgba(15, 23, 42, 0.05);
+  border-color: #DDD6FE;
+}
+
+.glass-header {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.gradient-lavender-subtle {
+  background: linear-gradient(135deg, #FAF5FF 0%, #F5F3FF 50%, #FFFFFF 100%);
+}
+
+.gradient-purple-hero {
+  background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 60%, #4C1D95 100%);
+}
+
+@keyframes shrinkToastProgress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}

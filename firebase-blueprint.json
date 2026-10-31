@@ -1,0 +1,200 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile containing background, target career goal, and readiness state",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "targetRoleId": { "type": "string" },
+        "targetRoleTitle": { "type": "string" },
+        "targetFamily": { "type": "string" },
+        "experienceLevel": { "type": "string" },
+        "dailyHours": { "type": "number" },
+        "readinessScore": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "targetRoleId", "targetRoleTitle"]
+    },
+    "CareerGoal": {
+      "title": "CareerGoal",
+      "description": "Specific career aspiration and time commitment",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "roleId": { "type": "string" },
+        "roleTitle": { "type": "string" },
+        "family": { "type": "string" },
+        "targetDate": { "type": "string" },
+        "hoursPerWeek": { "type": "number" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "roleId", "roleTitle"]
+    },
+    "UserSkill": {
+      "title": "UserSkill",
+      "description": "A skill claimed or demonstrated by the user along with evidence state",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "skillName": { "type": "string" },
+        "category": { "type": "string" },
+        "evidenceState": { "type": "string", "enum": ["CLAIMED", "LEARNING", "DEMONSTRATED", "APPLIED", "INTERVIEW_DEMONSTRATED"] },
+        "confidence": { "type": "number" },
+        "evidenceCount": { "type": "number" },
+        "lastVerifiedAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "skillName", "evidenceState"]
+    },
+    "SkillEvidence": {
+      "title": "SkillEvidence",
+      "description": "Proof artifact verifying skill proficiency",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "skillName": { "type": "string" },
+        "evidenceType": { "type": "string", "enum": ["ASSESSMENT", "PROJECT", "INTERVIEW", "COURSE", "GITHUB", "SELF_REPORT"] },
+        "referenceTitle": { "type": "string" },
+        "summary": { "type": "string" },
+        "score": { "type": "number" },
+        "verified": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "skillName", "evidenceType"]
+    },
+    "LearningPlan": {
+      "title": "LearningPlan",
+      "description": "Personalized weekly learning roadmap",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "roleTitle": { "type": "string" },
+        "totalWeeks": { "type": "number" },
+        "currentWeek": { "type": "number" },
+        "status": { "type": "string" },
+        "tasksCompleted": { "type": "number" },
+        "totalTasks": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "roleTitle", "totalWeeks"]
+    },
+    "PortfolioProject": {
+      "title": "PortfolioProject",
+      "description": "Hands-on project tailored to bridge specific skill gaps",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "skillsCovered": { "type": "string" },
+        "difficulty": { "type": "string" },
+        "estimatedHours": { "type": "number" },
+        "status": { "type": "string" },
+        "repoUrl": { "type": "string" },
+        "demoUrl": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "title", "difficulty"]
+    },
+    "InterviewSession": {
+      "title": "InterviewSession",
+      "description": "A completed or in-progress mock interview session",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "targetRole": { "type": "string" },
+        "interviewType": { "type": "string" },
+        "overallScore": { "type": "number" },
+        "technicalScore": { "type": "number" },
+        "conceptualScore": { "type": "number" },
+        "problemSolvingScore": { "type": "number" },
+        "communicationScore": { "type": "number" },
+        "practicalScore": { "type": "number" },
+        "feedback": { "type": "string" },
+        "weakTopics": { "type": "string" },
+        "completedAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "targetRole", "interviewType"]
+    },
+    "JobApplication": {
+      "title": "JobApplication",
+      "description": "A tracked job application and its recruitment lifecycle",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "company": { "type": "string" },
+        "position": { "type": "string" },
+        "status": { "type": "string", "enum": ["WISHLIST", "APPLIED", "SCREENING", "INTERVIEW", "OFFER", "REJECTED"] },
+        "appliedDate": { "type": "string" },
+        "notes": { "type": "string" },
+        "rejectionDiagnosis": { "type": "string" }
+      },
+      "required": ["id", "userId", "company", "position", "status"]
+    },
+    "AgentRunLog": {
+      "title": "AgentRunLog",
+      "description": "Audit record of multi-agent execution steps",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "agent": { "type": "string" },
+        "objective": { "type": "string" },
+        "status": { "type": "string" },
+        "durationMs": { "type": "number" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "userId", "agent", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/profile": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profile document containing career target and overall progress"
+    },
+    "/users/{userId}/careerGoals/{goalId}": {
+      "schema": { "$ref": "#/entities/CareerGoal" },
+      "description": "User career goals and time commitment"
+    },
+    "/users/{userId}/userSkills/{skillId}": {
+      "schema": { "$ref": "#/entities/UserSkill" },
+      "description": "Skills with distinct evidence states"
+    },
+    "/users/{userId}/skillEvidence/{evidenceId}": {
+      "schema": { "$ref": "#/entities/SkillEvidence" },
+      "description": "Concrete proofs and verification records"
+    },
+    "/users/{userId}/learningPlans/{planId}": {
+      "schema": { "$ref": "#/entities/LearningPlan" },
+      "description": "Active and past learning plans"
+    },
+    "/users/{userId}/projects/{projectId}": {
+      "schema": { "$ref": "#/entities/PortfolioProject" },
+      "description": "Recommended and submitted portfolio projects"
+    },
+    "/users/{userId}/interviewSessions/{sessionId}": {
+      "schema": { "$ref": "#/entities/InterviewSession" },
+      "description": "Mock interview sessions with rubric breakdown"
+    },
+    "/users/{userId}/applications/{applicationId}": {
+      "schema": { "$ref": "#/entities/JobApplication" },
+      "description": "Job application tracker"
+    },
+    "/users/{userId}/agentRuns/{runId}": {
+      "schema": { "$ref": "#/entities/AgentRunLog" },
+      "description": "Multi-agent execution audit history"
+    }
+  }
+}
