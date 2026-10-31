@@ -215,7 +215,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ activeTab, setActiveTab, c
             <div className="flex items-center gap-1 sm:gap-2.5 pl-1 sm:pl-2 border-l border-slate-200">
               <div className="w-8 h-8 rounded-full bg-purple-100 border border-purple-200 flex items-center justify-center text-purple-700 text-xs font-bold overflow-hidden shadow-xs">
                 {user.user_metadata?.avatar_url ? (
-                  <img src={user.photoURL} alt={(user.user_metadata?.full_name || user.user_metadata?.name || 'User') as string} className="w-full h-full object-cover" />
+                  <img src={user.user_metadata?.avatar_url as string} alt={(user.user_metadata?.full_name || user.user_metadata?.name || 'User') as string} className="w-full h-full object-cover" />
                 ) : (
                   ((user.user_metadata?.full_name || user.user_metadata?.name || user.email || 'U') as string).charAt(0).toUpperCase()
                 )}
