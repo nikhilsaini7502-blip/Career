@@ -92,3 +92,23 @@ html.dark .copilot-panel :is(.bg-white,.bg-slate-50\/40) { background:#111827; }
  .copilot-panel { width:100vw; left:0; right:0; }
  .card-3d:hover { transform:none; }
 }
+
+/* Keep the lavender/semantic surfaces legible in the dark palette too. */
+html.dark .app-shell :is(
+  [class~="bg-purple-50"],[class~="bg-indigo-50"],[class~="bg-violet-50"],
+  [class~="bg-blue-50"],[class~="bg-sky-50"],[class~="bg-emerald-50"],
+  [class~="bg-green-50"],[class~="bg-amber-50"],[class~="bg-yellow-50"],
+  [class~="bg-rose-50"],[class~="bg-red-50"],[class~="bg-orange-50"]
+) { background-color:#202a3c; }
+html.dark .app-shell :is([class~="from-white"]) { background-image:none; background-color:#111827; }
+html.dark .app-shell :is(
+  [class~="border-purple-100"],[class~="border-purple-200"],[class~="border-indigo-100"],
+  [class~="border-emerald-200"],[class~="border-amber-200"],[class~="border-rose-200"]
+) { border-color:#3b4660; }
+html.dark .app-shell :is(
+  [class~="text-purple-700"],[class~="text-purple-800"],[class~="text-purple-900"],
+  [class~="text-indigo-700"],[class~="text-indigo-800"],[class~="text-indigo-900"]
+) { color:#C4B5FD; }
+html.dark .app-shell :is([class~="text-emerald-700"],[class~="text-green-700"]) { color:#6EE7B7; }
+html.dark .app-shell :is([class~="text-amber-700"],[class~="text-amber-800"],[class~="text-orange-700"]) { color:#FCD34D; }
+html.dark .app-shell :is([class~="text-rose-600"],[class~="text-red-600"]) { color:#FDA4AF; }
