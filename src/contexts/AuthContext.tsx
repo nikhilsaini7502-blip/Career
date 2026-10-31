@@ -76,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       console.warn('Google sign-in exception:', err);
-      setAuthError(err?.message || 'Authentication could not be completed.');
+      setAuthError(code === 'auth/unauthorized-domain' ? 'This website domain is not authorized for Google sign-in. Add the current hosting domain in Firebase Console → Authentication → Settings → Authorized domains, then retry.' : (err?.message || 'Authentication could not be completed.'));
     } finally {
       setLoading(false);
     }
