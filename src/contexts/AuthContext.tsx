@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth, loginWithGoogle, completeGoogleRedirect, logoutUser, testFirestoreConnection } from '../services/firebase';
+import type { User } from '@supabase/supabase-js';
+import { supabase } from '../services/supabase';
 
 interface AuthContextType {
   user: User | null;
@@ -14,14 +14,8 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-  isDemoUser: false,
-  authError: null,
-  clearAuthError: () => {},
-  loginGoogle: async () => {},
-  logout: async () => {},
-  enterDemoMode: () => {}
+  user: null, loading: true, isDemoUser: false, authError: null,
+  clearAuthError: () => {}, loginGoogle: async () => {}, logout: async () => {}, enterDemoMode: () => {}
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -31,93 +25,69 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
-    testFirestoreConnection();
-    completeGoogleRedirect().then((redirectUser) => {
-      if (redirectUser) {
-        setUser(redirectUser);
-        setIsDemoUser(false);
-        setAuthError(null);
+    let mounted = true;
+    const restoreSession = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        if (!mounted) return;
+        setUser(data.session?.user ?? null);
+        setIsDemoUser(!data.session && localStorage.getItem('proofpath_demo_mode') === 'true');
+      } catch (error) {
+        if (mounted) setAuthError(error instanceof Error ? error.message : 'Could not restore your session.');
+      } finally {
+        if (mounted) setLoading(false);
       }
-    }).catch((err: any) => {
-      const code = err?.code || '';
-      setAuthError(code === 'auth/unauthorized-domain'
-        ? 'This website domain is not authorized for Google sign-in. Add the current hosting domain in Firebase Console → Authentication → Settings → Authorized domains, then retry.'
-        : (err?.message || 'Google sign-in could not be completed.'));
-    });
-
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        setUser(firebaseUser);
+    };
+    void restoreSession();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        localStorage.removeItem('proofpath_demo_mode');
         setIsDemoUser(false);
         setAuthError(null);
-      } else {
-        // If no user is logged in, check if user was previously in demo mode
-        const savedDemo = localStorage.getItem('proofpath_demo_mode');
-        if (savedDemo === 'true') {
-          setIsDemoUser(true);
-        } else {
-          setUser(null);
-        }
       }
       setLoading(false);
     });
-
-    return () => unsubscribe();
+    return () => { mounted = false; subscription.unsubscribe(); };
   }, []);
 
   const clearAuthError = () => setAuthError(null);
-
   const loginGoogle = async () => {
+    setLoading(true);
+    setAuthError(null);
+    localStorage.removeItem('proofpath_demo_mode');
+    setIsDemoUser(false);
     try {
-      setLoading(true);
-      setAuthError(null);
-      localStorage.removeItem('proofpath_demo_mode');
-      const authedUser = await loginWithGoogle();
-      if (authedUser) {
-        setUser(authedUser);
-        setIsDemoUser(false);
-      }
-    } catch (err: any) {
-      const code = err?.code || '';
-      if (
-        code === 'auth/cancelled-popup-request' ||
-        code === 'auth/popup-closed-by-user' ||
-        code === 'auth/user-cancelled'
-      ) {
-        // User closed or cancelled popup; no fatal error
-        return;
-      }
-      console.warn('Google sign-in exception:', err);
-      setAuthError(code === 'auth/unauthorized-domain' ? 'This website domain is not authorized for Google sign-in. Add the current hosting domain in Firebase Console → Authentication → Settings → Authorized domains, then retry.' : (err?.message || 'Authentication could not be completed.'));
-    } finally {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin, queryParams: { prompt: 'select_account' } }
+      });
+      if (error) throw error;
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : 'Google sign-in could not be started.');
       setLoading(false);
     }
   };
-
   const logout = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       localStorage.removeItem('proofpath_demo_mode');
-      setIsDemoUser(false);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       setUser(null);
-      await logoutUser();
-    } catch (err) {
-      console.error('Logout Error:', err);
-    } finally {
-      setLoading(false);
-    }
+      setIsDemoUser(false);
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : 'Sign out failed.');
+    } finally { setLoading(false); }
   };
-
   const enterDemoMode = () => {
     localStorage.setItem('proofpath_demo_mode', 'true');
+    setUser(null);
     setIsDemoUser(true);
+    setAuthError(null);
   };
-
-  return (
-    <AuthContext.Provider value={{ user, loading, isDemoUser, authError, clearAuthError, loginGoogle, logout, enterDemoMode }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, loading, isDemoUser, authError, clearAuthError, loginGoogle, logout, enterDemoMode }}>{children}</AuthContext.Provider>;
 };
-
 export const useAuth = () => useContext(AuthContext);
