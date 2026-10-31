@@ -265,7 +265,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ activeTab, setActiveTab, c
         <div className="auth-error-banner border-b px-3 sm:px-4 py-2.5 text-xs flex flex-wrap items-center justify-between gap-2 animate-fade-in z-30">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-            <span>{authError} You can continue using all features seamlessly in the Demo Workspace.</span>
+            <span className="break-words">{authError} You can continue using all features seamlessly in the Demo Workspace.</span>
           </div>
           <div className="flex items-center gap-2">
             <button
