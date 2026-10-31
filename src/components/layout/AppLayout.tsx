@@ -238,14 +238,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ activeTab, setActiveTab, c
                 onClick={loginGoogle}
                 className="text-xs bg-purple-600 hover:bg-purple-700 text-white font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-xs"
               >
-                Sign in with Google
+                <span className="sm:hidden">Sign In</span><span className="hidden sm:inline">Sign in with Google</span>
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <button
                 onClick={enterDemoMode}
-                className="text-xs text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors font-medium"
+                className="hidden sm:block text-xs text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors font-medium"
               >
                 Try Demo
               </button>
@@ -253,7 +253,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ activeTab, setActiveTab, c
                 onClick={loginGoogle}
                 className="text-xs bg-purple-600 hover:bg-purple-700 text-white font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-xs shadow-purple-600/20"
               >
-                Google Sign In
+                <span className="sm:hidden">Sign In</span><span className="hidden sm:inline">Google Sign In</span>
               </button>
             </div>
           )}
