@@ -40,3 +40,21 @@ The migration creates RLS policies for each user-owned table and a private `resu
 - Do not copy demo candidate data (Alex Chen) into real user accounts. The next phase will replace hard-coded frontend state with authenticated, per-user reads/writes.
 - Do not disable RLS to make requests work. Fix the user's JWT/session or policy instead.
 - Before production, add automated migration checks, backup/PITR settings, request validation, rate limits, and end-to-end tests.
+
+## 5. Enable Google sign-in in Supabase
+1. In Supabase, open **Authentication → Sign In / Providers → Google** and enable Google.
+2. In Google Cloud Console, create/select an OAuth 2.0 Web Client ID.
+3. Add Supabase's displayed callback URL (shown in the Google provider panel) to the Google OAuth client's **Authorized redirect URIs**.
+4. Add your site URLs under **Authentication → URL Configuration → Redirect URLs**:
+   - `http://localhost:3000/**` (local development)
+   - `https://proofpath-o61j.onrender.com/**` (production)
+5. Save the Google Client ID and Client Secret in Supabase's Google provider settings. Do not put the Google client secret in frontend environment variables.
+
+The frontend now uses Supabase Auth OAuth. Firebase Authentication is no longer used by the active AuthContext. Existing Firebase packages/config can be removed after confirming the Supabase login flow works.
+
+## 6. Deploy environment variables
+In Render → your PROOFPATH web service → **Environment**, add:
+- `VITE_SUPABASE_URL` = your project URL
+- `VITE_SUPABASE_ANON_KEY` = your publishable/anon key
+
+Trigger a new deploy after saving. These two values are browser-safe; all data access still relies on the SQL RLS policies. Do not set the service role key in any `VITE_*` variable.
