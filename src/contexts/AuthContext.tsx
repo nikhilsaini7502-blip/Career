@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth, loginWithGoogle, completeGoogleRedirect, logoutUser, testFirestoreConnection } from '../services/firebase';
+import type { User } from '@supabase/supabase-js';
+import { supabase } from '../services/supabase';
 
 interface AuthContextType {
   user: User | null;
@@ -14,14 +14,9 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-  isDemoUser: false,
-  authError: null,
-  clearAuthError: () => {},
-  loginGoogle: async () => {},
-  logout: async () => {},
-  enterDemoMode: () => {}
+  user: null, loading: true, isDemoUser: false, authError: null,
+  clearAuthError: () => {}, loginGoogle: async () => {},
+  logout: async () => {}, enterDemoMode: () => {}
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -31,78 +26,67 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
-    testFirestoreConnection();
-    completeGoogleRedirect().then((redirectUser) => {
-      if (redirectUser) {
-        setUser(redirectUser);
-        setIsDemoUser(false);
-        setAuthError(null);
-      }
-    }).catch((err: any) => {
-      const code = err?.code || '';
-      setAuthError(code === 'auth/unauthorized-domain'
-        ? 'This website domain is not authorized for Google sign-in. Add the current hosting domain in Firebase Console → Authentication → Settings → Authorized domains, then retry.'
-        : (err?.message || 'Google sign-in could not be completed.'));
+    let active = true;
+    if (!supabase) {
+      setAuthError('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to the deployment environment.');
+      setLoading(false);
+      return;
+    }
+
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!active) return;
+      if (error) setAuthError(error.message);
+      setUser(data.session?.user ?? null);
+      setLoading(false);
     });
 
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        setUser(firebaseUser);
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active) return;
+      setUser(session?.user ?? null);
+      if (session?.user) {
         setIsDemoUser(false);
+        localStorage.removeItem('proofpath_demo_mode');
         setAuthError(null);
-      } else {
-        // If no user is logged in, check if user was previously in demo mode
-        const savedDemo = localStorage.getItem('proofpath_demo_mode');
-        if (savedDemo === 'true') {
-          setIsDemoUser(true);
-        } else {
-          setUser(null);
-        }
       }
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      active = false;
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
-  const clearAuthError = () => setAuthError(null);
-
   const loginGoogle = async () => {
-    try {
-      setLoading(true);
-      setAuthError(null);
-      localStorage.removeItem('proofpath_demo_mode');
-      const authedUser = await loginWithGoogle();
-      if (authedUser) {
-        setUser(authedUser);
-        setIsDemoUser(false);
-      }
-    } catch (err: any) {
-      const code = err?.code || '';
-      if (
-        code === 'auth/cancelled-popup-request' ||
-        code === 'auth/popup-closed-by-user' ||
-        code === 'auth/user-cancelled'
-      ) {
-        // User closed or cancelled popup; no fatal error
-        return;
-      }
-      console.warn('Google sign-in exception:', err);
-      setAuthError(code === 'auth/unauthorized-domain' ? 'This website domain is not authorized for Google sign-in. Add the current hosting domain in Firebase Console → Authentication → Settings → Authorized domains, then retry.' : (err?.message || 'Authentication could not be completed.'));
-    } finally {
+    if (!supabase) {
+      setAuthError('Supabase is not configured. Add the VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
+      return;
+    }
+    setLoading(true);
+    setAuthError(null);
+    localStorage.removeItem('proofpath_demo_mode');
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin }
+    });
+    if (error) {
+      setAuthError(error.message);
       setLoading(false);
     }
   };
 
   const logout = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      localStorage.removeItem('proofpath_demo_mode');
-      setIsDemoUser(false);
+      if (supabase) {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+      }
       setUser(null);
-      await logoutUser();
-    } catch (err) {
-      console.error('Logout Error:', err);
+      setIsDemoUser(false);
+      localStorage.removeItem('proofpath_demo_mode');
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : 'Sign out failed.');
     } finally {
       setLoading(false);
     }
@@ -114,7 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, isDemoUser, authError, clearAuthError, loginGoogle, logout, enterDemoMode }}>
+    <AuthContext.Provider value={{ user, loading, isDemoUser, authError, clearAuthError: () => setAuthError(null), loginGoogle, logout, enterDemoMode }}>
       {children}
     </AuthContext.Provider>
   );
