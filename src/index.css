@@ -112,3 +112,55 @@ html.dark .app-shell :is(
 html.dark .app-shell :is([class~="text-emerald-700"],[class~="text-green-700"]) { color:#6EE7B7; }
 html.dark .app-shell :is([class~="text-amber-700"],[class~="text-amber-800"],[class~="text-orange-700"]) { color:#FCD34D; }
 html.dark .app-shell :is([class~="text-rose-600"],[class~="text-red-600"]) { color:#FDA4AF; }
+
+
+/* PROOFPATH dark-mode contrast pass: cover Tailwind opacity and gradient utilities
+   used by cards across every feature screen, not only the dashboard. */
+html.dark .app-shell :is(
+  [class*="bg-white/"], [class*="bg-slate-50/"], [class*="bg-slate-100"],
+  [class*="bg-slate-200"], [class*="bg-slate-300"],
+  [class*="bg-gray-50"], [class*="bg-gray-100"], [class*="bg-gray-200"], [class*="bg-gray-300"],
+  [class*="bg-zinc-50"], [class*="bg-zinc-100"], [class*="bg-zinc-200"], [class*="bg-zinc-300"],
+  [class*="bg-neutral-50"], [class*="bg-neutral-100"], [class*="bg-neutral-200"], [class*="bg-neutral-300"],
+  [class*="bg-purple-50/"], [class*="bg-indigo-50/"], [class*="bg-violet-50/"],
+  [class*="bg-blue-50/"], [class*="bg-emerald-50/"], [class*="bg-amber-50/"],
+  [class*="bg-rose-50/"], [class*="bg-orange-50/"]
+) {
+  background-color: #1B2638 !important;
+  background-image: none !important;
+}
+html.dark .app-shell :is(
+  [class*="from-white"], [class*="via-white"], [class*="to-white"],
+  [class*="via-purple-50"], [class*="to-purple-50"],
+  [class*="via-indigo-50"], [class*="to-indigo-50"],
+  [class*="via-violet-50"], [class*="to-violet-50"]
+) {
+  --tw-gradient-from: #111827 !important;
+  --tw-gradient-via: #172033 !important;
+  --tw-gradient-to: #1B2638 !important;
+  background-image: none !important;
+  background-color: #111827 !important;
+}
+html.dark .app-shell :is(
+  [class*="text-slate-50"], [class*="text-slate-100"],
+  [class*="text-slate-200"], [class*="text-slate-300"]
+) { color: #CBD5E1 !important; }
+html.dark .app-shell :is(
+  [class*="text-gray-50"], [class*="text-gray-100"],
+  [class*="text-gray-200"], [class*="text-gray-300"]
+) { color: #CBD5E1 !important; }
+html.dark .app-shell :is(
+  [class*="border-slate-100"], [class*="border-slate-200"],
+  [class*="border-gray-100"], [class*="border-gray-200"]
+) { border-color: #334155 !important; }
+
+/* Keep muted copy readable while preserving saturated status and action colors. */
+html.dark .app-shell :is(
+  [class*="text-slate-400"], [class*="text-gray-400"]
+) { color: #A8B5C7 !important; }
+html.dark .app-shell :is(
+  [class*="placeholder:text-slate-300"], [class*="placeholder:text-slate-400"]
+)::placeholder { color: #94A3B8 !important; }
+html.dark .app-shell :is(input, textarea, select, option) {
+  color-scheme: dark;
+}
