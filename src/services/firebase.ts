@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, User } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, User } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
@@ -10,6 +10,11 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const db = getFirestore(app, (firebaseConfig as any).firestoreDatabaseId);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+
+export async function completeGoogleRedirect(): Promise<User | null> {
+  const result = await getRedirectResult(auth);
+  return result?.user ?? null;
+}
 
 export enum OperationType {
   CREATE = 'create',
@@ -72,6 +77,10 @@ export async function loginWithGoogle(): Promise<User | null> {
   isSignInInProgress = true;
   try {
     googleProvider.setCustomParameters({ prompt: 'select_account' });
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches) {
+      await signInWithRedirect(auth, googleProvider);
+      return null;
+    }
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
   } catch (error: any) {

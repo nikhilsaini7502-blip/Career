@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth, loginWithGoogle, logoutUser, testFirestoreConnection } from '../services/firebase';
+import { auth, loginWithGoogle, completeGoogleRedirect, logoutUser, testFirestoreConnection } from '../services/firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -32,6 +32,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     testFirestoreConnection();
+    completeGoogleRedirect().then((redirectUser) => {
+      if (redirectUser) {
+        setUser(redirectUser);
+        setIsDemoUser(false);
+        setAuthError(null);
+      }
+    }).catch((err: any) => {
+      const code = err?.code || '';
+      setAuthError(code === 'auth/unauthorized-domain'
+        ? 'This website domain is not authorized for Google sign-in. Add the current hosting domain in Firebase Console → Authentication → Settings → Authorized domains, then retry.'
+        : (err?.message || 'Google sign-in could not be completed.'));
+    });
 
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
@@ -76,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       console.warn('Google sign-in exception:', err);
-      setAuthError(err?.message || 'Authentication could not be completed.');
+      setAuthError(code === 'auth/unauthorized-domain' ? 'This website domain is not authorized for Google sign-in. Add the current hosting domain in Firebase Console → Authentication → Settings → Authorized domains, then retry.' : (err?.message || 'Authentication could not be completed.'));
     } finally {
       setLoading(false);
     }

@@ -63,3 +63,52 @@
     width: 0%;
   }
 }
+
+:root { color-scheme: light; } html.dark { color-scheme: dark; }
+.app-shell { background:#F8FAFC; color:#0F172A; }
+.app-header,.app-sidebar,.copilot-panel,.copilot-header,.copilot-composer { background:rgba(255,255,255,.97); border-color:#E2E8F0; }
+.app-main,.copilot-messages { background:#F8FAFC; }
+.theme-toggle { color:#475569; background:#fff; border-color:#E2E8F0; }
+.auth-error-banner { color:#92400E; background:#FFFBEB; border-color:#FDE68A; }
+html.dark body,html.dark .app-shell { background:#0B1020; color:#E2E8F0; }
+html.dark .app-header,html.dark .app-sidebar,html.dark .copilot-panel,html.dark .copilot-header,html.dark .copilot-composer { background:#111827; border-color:#293449; }
+html.dark .app-main,html.dark .copilot-messages { background:#0B1020; }
+html.dark .theme-toggle { background:#1F2937; color:#FDE68A; border-color:#374151; }
+html.dark .auth-error-banner { background:#332814; color:#FDE68A; border-color:#6B4B14; }
+html.dark .app-shell :is(.bg-white,.bg-white\/95,.bg-white\/90) { background-color:#111827; }
+html.dark .app-shell :is(.bg-slate-50,.bg-slate-50\/50,.bg-slate-50\/60,.bg-slate-50\/40) { background-color:#172033; }
+html.dark .app-shell :is(.text-slate-900,.text-slate-800) { color:#E5E7EB; }
+html.dark .app-shell :is(.text-slate-700,.text-slate-600) { color:#CBD5E1; }
+html.dark .app-shell :is(.text-slate-500,.text-slate-400) { color:#94A3B8; }
+html.dark .app-shell :is(.border-slate-200,.border-slate-200\/80,.border-slate-200\/90,.border-slate-100) { border-color:#293449; }
+html.dark .app-shell input,html.dark .app-shell textarea,html.dark .app-shell select { background:#172033; color:#E5E7EB; border-color:#374151; }
+html.dark .copilot-panel :is(.bg-white,.bg-slate-50\/40) { background:#111827; }
+@media(max-width:640px) {
+ html,body,#root { width:100%; min-width:0; min-height:100%; overflow-x:hidden; }
+ .app-shell { width:100%; min-width:0; overflow-x:clip; }
+ .app-header { min-height:60px; height:auto; }
+ .app-main { padding:.75rem; min-width:0; }
+ .app-main * { min-width:0; }
+ .copilot-panel { width:100vw; left:0; right:0; }
+ .card-3d:hover { transform:none; }
+}
+
+/* Keep the lavender/semantic surfaces legible in the dark palette too. */
+html.dark .app-shell :is(
+  [class~="bg-purple-50"],[class~="bg-indigo-50"],[class~="bg-violet-50"],
+  [class~="bg-blue-50"],[class~="bg-sky-50"],[class~="bg-emerald-50"],
+  [class~="bg-green-50"],[class~="bg-amber-50"],[class~="bg-yellow-50"],
+  [class~="bg-rose-50"],[class~="bg-red-50"],[class~="bg-orange-50"]
+) { background-color:#202a3c; }
+html.dark .app-shell :is([class~="from-white"]) { background-image:none; background-color:#111827; }
+html.dark .app-shell :is(
+  [class~="border-purple-100"],[class~="border-purple-200"],[class~="border-indigo-100"],
+  [class~="border-emerald-200"],[class~="border-amber-200"],[class~="border-rose-200"]
+) { border-color:#3b4660; }
+html.dark .app-shell :is(
+  [class~="text-purple-700"],[class~="text-purple-800"],[class~="text-purple-900"],
+  [class~="text-indigo-700"],[class~="text-indigo-800"],[class~="text-indigo-900"]
+) { color:#C4B5FD; }
+html.dark .app-shell :is([class~="text-emerald-700"],[class~="text-green-700"]) { color:#6EE7B7; }
+html.dark .app-shell :is([class~="text-amber-700"],[class~="text-amber-800"],[class~="text-orange-700"]) { color:#FCD34D; }
+html.dark .app-shell :is([class~="text-rose-600"],[class~="text-red-600"]) { color:#FDA4AF; }

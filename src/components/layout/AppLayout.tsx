@@ -18,7 +18,9 @@ import {
   X,
   ShieldCheck,
   Zap,
-  AlertCircle
+  AlertCircle,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useCareerData } from '../../contexts/CareerDataContext';
@@ -55,6 +57,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ activeTab, setActiveTab, c
   } = useCareerData();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [agentMenuOpen, setAgentMenuOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('proofpath_theme') === 'dark');
+  React.useEffect(() => { document.documentElement.classList.toggle('dark', darkMode); localStorage.setItem('proofpath_theme', darkMode ? 'dark' : 'light'); }, [darkMode]);
 
   const navItems: Array<{ id: NavTab; label: string; icon: React.ComponentType<{ className?: string }>; badge?: string }> = [
     { id: 'dashboard', label: 'Overview Dashboard', icon: LayoutDashboard },
@@ -71,9 +75,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ activeTab, setActiveTab, c
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans selection:bg-purple-100 selection:text-purple-900">
+    <div className="app-shell min-h-screen flex flex-col font-sans selection:bg-purple-100 selection:text-purple-900">
       {/* Top Header - Clean White with Subtle Border & Shadow */}
-      <header className="h-16 border-b border-slate-200/80 bg-white/95 backdrop-blur-md sticky top-0 z-40 px-4 md:px-6 flex items-center justify-between shadow-xs">
+      <header className="app-header min-h-16 border-b backdrop-blur-md sticky top-0 z-40 px-4 md:px-6 flex items-center justify-between shadow-xs">
         <div className="flex items-center gap-3">
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
@@ -117,12 +121,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ activeTab, setActiveTab, c
         </div>
 
         {/* User Auth & Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <button type="button" onClick={() => setDarkMode(v => !v)} className="theme-toggle p-2 rounded-xl border" aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}>{darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}</button>
           {/* AI Co-Pilot Persistent Drawer Toggle */}
           <button
             onClick={() => setIsCoPilotOpen(!isCoPilotOpen)}
             className={`
-              flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border
+              hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border
               ${isCoPilotOpen 
                 ? 'bg-purple-600 text-white border-purple-600 shadow-sm shadow-purple-600/30 ring-2 ring-purple-100' 
                 : 'bg-white border-slate-200 text-slate-700 hover:text-purple-700 hover:border-purple-200 hover:bg-purple-50/50 shadow-xs'}
@@ -205,8 +210,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ activeTab, setActiveTab, c
             )}
           </div>
 
+          <button onClick={() => setIsCoPilotOpen(!isCoPilotOpen)} className="sm:hidden p-2 rounded-xl border border-slate-200 text-purple-700" aria-label="Open AI Co-Pilot"><Bot className="w-4 h-4" /></button>
           {user ? (
-            <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200">
+            <div className="flex items-center gap-1 sm:gap-2.5 pl-1 sm:pl-2 border-l border-slate-200">
               <div className="w-8 h-8 rounded-full bg-purple-100 border border-purple-200 flex items-center justify-center text-purple-700 text-xs font-bold overflow-hidden shadow-xs">
                 {user.photoURL ? (
                   <img src={user.photoURL} alt={user.displayName || 'User'} className="w-full h-full object-cover" />
@@ -232,14 +238,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ activeTab, setActiveTab, c
                 onClick={loginGoogle}
                 className="text-xs bg-purple-600 hover:bg-purple-700 text-white font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-xs"
               >
-                Sign in with Google
+                <span className="sm:hidden">Sign In</span><span className="hidden sm:inline">Sign in with Google</span>
               </button>
             </div>
           ) : (
             <div className="flex items-center gap-2">
               <button
                 onClick={enterDemoMode}
-                className="text-xs text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors font-medium"
+                className="hidden sm:block text-xs text-slate-600 hover:text-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors font-medium"
               >
                 Try Demo
               </button>
@@ -247,7 +253,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ activeTab, setActiveTab, c
                 onClick={loginGoogle}
                 className="text-xs bg-purple-600 hover:bg-purple-700 text-white font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-xs shadow-purple-600/20"
               >
-                Google Sign In
+                <span className="sm:hidden">Sign In</span><span className="hidden sm:inline">Google Sign In</span>
               </button>
             </div>
           )}
@@ -256,10 +262,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ activeTab, setActiveTab, c
 
       {/* Auth Error Banner if sign-in fails */}
       {authError && (
-        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2.5 text-xs text-amber-900 flex items-center justify-between gap-3 animate-fade-in z-30">
+        <div className="auth-error-banner border-b px-3 sm:px-4 py-2.5 text-xs flex flex-wrap items-center justify-between gap-2 animate-fade-in z-30">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-            <span>{authError} You can continue using all features seamlessly in the Demo Workspace.</span>
+            <span className="break-words">{authError} You can continue using all features seamlessly in the Demo Workspace.</span>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -280,11 +286,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ activeTab, setActiveTab, c
       )}
 
       {/* Main App Container */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex min-h-0 overflow-hidden">
         {/* Sidebar Navigation - Pure White with Lavender Selection & 3D Polish */}
         <aside 
           className={`
-            fixed md:static inset-y-16 left-0 z-30 w-64 bg-white border-r border-slate-200/80 p-3 flex flex-col justify-between transition-transform duration-200 shadow-xs
+            fixed md:static top-16 bottom-0 left-0 z-30 w-[min(18rem,88vw)] md:w-64 app-sidebar border-r p-3 flex flex-col justify-between transition-transform duration-200 shadow-xs
             ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
           `}
         >
@@ -346,8 +352,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ activeTab, setActiveTab, c
         )}
 
         {/* Primary Content View Area */}
-        <main className={`flex-1 overflow-y-auto bg-[#F8FAFC] p-4 sm:p-6 lg:p-8 transition-all duration-300 ${isCoPilotOpen && activeTab !== 'assistant' ? 'xl:mr-[420px]' : ''}`}>
-          <div className="max-w-7xl mx-auto">
+        <main className={`app-main min-w-0 flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 transition-all duration-300 ${isCoPilotOpen && activeTab !== 'assistant' ? 'xl:mr-[420px]' : ''}`}>
+          <div className="max-w-7xl mx-auto min-w-0">
             {children}
           </div>
         </main>
