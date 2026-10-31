@@ -15,6 +15,7 @@ import {
 import { TECH_ROLES_TAXONOMY, findRoleById } from '../data/rolesTaxonomy';
 import { calculateCareerReadiness, computeSkillGaps } from '../utils/evidenceEngine';
 import { useToast } from './ToastContext';
+import { loadCareerCore, saveCareerProfile, saveCareerSkills, saveSkillEvidence } from '../services/careerPersistence';
 
 interface CareerDataContextType {
   profile: UserProfile;
@@ -285,7 +286,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
 const CareerDataContext = createContext<CareerDataContextType | null>(null);
 
 export const CareerDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, isDemoUser } = useAuth();
   const { notifySkillGapCompleted, notifyRoadmapUpdated, notifyEvidenceVerified, showToast } = useToast();
   const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
   const [userSkills, setUserSkills] = useState(INITIAL_SKILLS);
@@ -298,6 +299,8 @@ export const CareerDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
   const [isCoPilotOpen, setIsCoPilotOpen] = useState(false);
   const navCallbackRef = useRef<((tab: string) => void) | null>(null);
+  const careerDataReadyRef = useRef(false);
+  const persistedEvidenceIdsRef = useRef<Set<string>>(new Set());
 
   const navigateToTab = (tab: string) => {
     if (navCallbackRef.current) {
@@ -308,6 +311,79 @@ export const CareerDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const setNavigateToTab = (fn: (tab: string) => void) => {
     navCallbackRef.current = fn;
   };
+
+  // Load the signed-in user's real career data. Demo mode keeps the seeded showcase data.
+  useEffect(() => {
+    let active = true;
+    careerDataReadyRef.current = false;
+
+    if (!user) {
+      if (!isDemoUser) {
+        setProfile({ ...DEFAULT_PROFILE, uid: '', displayName: '', email: '' });
+        setUserSkills([]);
+        setEvidenceRecords([]);
+      }
+      return () => { active = false; };
+    }
+
+    setProfile({
+      ...DEFAULT_PROFILE,
+      uid: user.id,
+      displayName: user.user_metadata?.full_name || user.user_metadata?.name || user.email || 'Career Builder',
+      email: user.email || ''
+    });
+    setUserSkills([]);
+    setEvidenceRecords([]);
+    persistedEvidenceIdsRef.current = new Set();
+
+    void loadCareerCore(user).then(data => {
+      if (!active) return;
+      setProfile(data.profile);
+      setUserSkills(data.skills);
+      setEvidenceRecords(data.evidence);
+      persistedEvidenceIdsRef.current = new Set(data.evidence.map(record => record.id));
+      careerDataReadyRef.current = true;
+    }).catch(error => {
+      console.error('Failed to load career data from Supabase:', error);
+      if (active) showToast({
+        type: 'error',
+        title: 'Could not load your saved career data',
+        message: 'Please refresh the page. Your account is still signed in.'
+      });
+    });
+
+    return () => { active = false; };
+  }, [user?.id, isDemoUser]);
+
+  // Persist profile edits after the initial Supabase load has completed.
+  useEffect(() => {
+    if (!user || !careerDataReadyRef.current) return;
+    void saveCareerProfile(profile, user).catch(error =>
+      console.error('Failed to save career profile:', error)
+    );
+  }, [profile, user?.id]);
+
+  // Persist skill changes using the per-user unique key.
+  useEffect(() => {
+    if (!user || !careerDataReadyRef.current) return;
+    void saveCareerSkills(userSkills, user).catch(error =>
+      console.error('Failed to save career skills:', error)
+    );
+  }, [userSkills, user?.id]);
+
+  // Insert only evidence records that were created in this session; loaded rows are not duplicated.
+  useEffect(() => {
+    if (!user || !careerDataReadyRef.current) return;
+    const newRecords = evidenceRecords.filter(record => !persistedEvidenceIdsRef.current.has(record.id));
+    if (!newRecords.length) return;
+    newRecords.forEach(record => persistedEvidenceIdsRef.current.add(record.id));
+    void saveSkillEvidence(newRecords, user).catch(error => {
+      newRecords.forEach(record => persistedEvidenceIdsRef.current.delete(record.id));
+      console.error('Failed to save skill evidence:', error);
+      showToast({ type: 'error', title: 'Evidence could not be saved', message: 'Please try again.' });
+    });
+  }, [evidenceRecords, user?.id]);
+
 
   // Derive target role and recalculate readiness & gaps reactively
   const targetRole = findRoleById(profile.targetRoleId) || TECH_ROLES_TAXONOMY[0];
@@ -337,7 +413,7 @@ export const CareerDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     if (artifactTitle) {
       const newEv: SkillEvidenceRecord = {
         id: `ev-${Date.now()}`,
-        userId: user?.uid || profile.uid,
+        userId: user?.id || profile.uid,
         skillName,
         evidenceType: newState === 'APPLIED' ? 'PROJECT' : 'ASSESSMENT',
         referenceTitle: artifactTitle,
